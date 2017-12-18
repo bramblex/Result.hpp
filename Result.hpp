@@ -4,13 +4,10 @@
 template <typename T = void, typename E = void>
 struct Result {
 private:
-    union ResultContent {
-        T data;
-        E error;
-    };
 
     bool _ok;
-    ResultContent _content;
+    T _data;
+    E _err;
 
 public:
 
@@ -19,11 +16,15 @@ public:
     }
 
     Result(E err)
-        : _ok(true), _content({err}) {
+        : _ok(true), _err(err) {
     }
 
     Result(T data)
-        : _ok(true), _content({data}) {
+        : _ok(true), _data(data) {
+    }
+
+    operator T() {
+        return this->get();
     }
 
     static Result Succ(){
@@ -49,15 +50,15 @@ public:
     }
 
     const T& get() const {
-        assert(_ok); return _content.data;
+        assert(_ok); return _data;
     }
 
     const T& getOr(const T& data) const {
-        return _ok ? _content.data : data;
+        return _ok ? _data : data;
     }
 
     const E& getErr() const {
-        assert(!_ok); return _content.err;
+        assert(!_ok); return _err;
     }
 };
 
@@ -67,7 +68,7 @@ private:
     using ResultContent = T;
 
     bool _ok;
-    ResultContent _content;
+    ResultContent _data;
 
 public:
 
@@ -75,8 +76,16 @@ public:
         *this = Fail();
     }
 
+    Result (T data)
+        : Result(true, data) {
+    }
+
     Result(bool ok, T data)
-        : _ok(ok), _content(data) {
+        : _ok(ok), _data(data) {
+    }
+
+    operator T(){
+        return this->get();
     }
 
     static Result Succ(){
@@ -102,15 +111,15 @@ public:
     }
 
     const T& get() const {
-        assert(_ok); return _content;
+        assert(_ok); return _data;
     }
 
     const T& getOr(const T& data) const {
-        return _ok ? _content.data : data;
+        return _ok ? _data : data;
     }
 
     const T& getErr() const {
-        assert(!_ok); return _content;
+        assert(!_ok); return _data;
     }
 };
 
@@ -121,7 +130,7 @@ private:
     using ResultContent = T;
 
     bool _ok;
-    ResultContent _content;
+    ResultContent _data;
 
 public:
 
@@ -130,7 +139,11 @@ public:
     }
 
     Result(T data)
-        : _ok(true), _content(data) {
+        : _ok(true), _data(data) {
+    }
+
+    operator T(){
+        return this->get();
     }
 
     static Result Succ(){
@@ -151,21 +164,20 @@ public:
     }
 
     const T& get() const {
-        assert(_ok); return _content;
+        assert(_ok); return _data;
     }
 
     const T& getOr(const T& data) const {
-        return _ok ? _content.data : data;
+        return _ok ? _data : data;
     }
 };
 
-template <typename T>
-struct Result<void, T> {
+template <typename E>
+struct Result<void, E> {
 private:
-    using ResultContent = T;
 
     bool _ok;
-    ResultContent _content;
+    E _err;
 
 public:
 
@@ -173,8 +185,8 @@ public:
         : _ok(false) {
     }
 
-    Result(T data)
-        : _ok(false), _content(data) {
+    Result(E err)
+        : _ok(false), _err(err) {
     }
 
     static Result Succ(){
@@ -187,7 +199,7 @@ public:
         return Result();
     }
 
-    static Result Fail(T data){
+    static Result Fail(E data){
         return Result(data);
     }
 
@@ -195,8 +207,8 @@ public:
         return _ok;
     }
 
-    const T& getErr() const {
-        assert(!_ok); return _content;
+    const E& getErr() const {
+        assert(!_ok); return _err;
     }
 };
 
