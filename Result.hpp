@@ -1,3 +1,6 @@
+// Result.hpp
+#ifndef RESULT_HPP
+#define RESULT_HPP
 
 #include <cassert>
 
@@ -16,7 +19,7 @@ public:
     }
 
     Result(E err)
-        : _ok(true), _err(err) {
+        : _ok(false), _err(err) {
     }
 
     Result(T data)
@@ -239,3 +242,5 @@ public:
         return _ok;
     }
 };
+
+#endif // RESULT_HPP
